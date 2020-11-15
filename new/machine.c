@@ -224,6 +224,7 @@ static void getsysctl(const char *name, void *ptr, size_t len);
 static int swapmode(int *retavail, int *retfree);
 static void update_layout(void);
 static int find_uid(uid_t needle, int *haystack);
+static int cmd_matches(struct kinfo_proc *, char *);
 
 static int
 find_uid(uid_t needle, int *haystack)
@@ -730,6 +731,38 @@ get_io_total(const struct kinfo_proc *pp)
 	return (get_io_stats(pp, &dummy, &dummy, &dummy, &dummy, &dummy));
 }
 
+static int
+cmd_matches(struct kinfo_proc *proc, char *term)
+{
+	extern int	show_args;
+	char		**args = NULL;
+
+	if (!term) {
+		/* No command filter set */
+		return 1;
+	} else {
+		/* Filter set, process name needs to contain term */
+		if (strstr(proc->p_comm, term))
+			return 1;
+		/* If showing arguments, search those as well */
+		if (show_args) {
+			args = get_proc_args(proc);
+
+			if (args == NULL) {
+				/* Failed to get args, so can't search them */
+				return 0;
+			}
+
+			while (*args != NULL) {
+				if (strstr(*args, term))
+					return 1;
+				args++;
+			}
+		}
+	}
+	return 0;
+}
+
 static struct handle handle;
 
 void *
@@ -742,9 +775,12 @@ get_process_info(struct system_info *si, struct process_select *sel,
 	long p_inblock, p_oublock, p_majflt, p_vcsw, p_ivcsw;
 	long nsec;
 	int active_procs;
+	int show_cmd;
 	struct kinfo_proc **prefp;
 	struct kinfo_proc *pp;
 	struct timespec previous_proc_uptime;
+
+	show_cmd = sel->command != NULL;
 
 	/*
 	 * If thread state was toggled, don't cache the previous processes.
@@ -867,6 +903,9 @@ get_process_info(struct system_info *si, struct process_select *sel,
 			continue;
 
 		if (sel->pid != -1 && pp->ki_pid != sel->pid)
+			continue;
+
+		if (show_cmd && !cmd_matches(pp, sel->command))
 			continue;
 
 		*prefp++ = pp;

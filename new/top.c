@@ -99,6 +99,7 @@ static const struct option longopts[] = {
     { "batch", no_argument, NULL, 'b' },
     /* c reserved */
     { "displays", required_argument, NULL, 'd' },
+    { "grep", required_argument, NULL, 'g' },
     { "interactive", no_argument, NULL, 'i' },
     { "jail-id", no_argument, NULL, 'j' },
     { "display-mode", required_argument, NULL, 'm' },
@@ -312,7 +313,7 @@ main(int argc, const char *argv[])
 	    optind = 1;
 	}
 
-	while ((i = getopt_long(ac, __DECONST(char * const *, av), "CSIHPabijJ:nquvzs:d:U:m:o:p:Ttw", longopts, NULL)) != EOF)
+	while ((i = getopt_long(ac, __DECONST(char * const *, av), "CSIHPabijJ:nquvzs:d:U:m:o:p:Ttwg:", longopts, NULL)) != EOF)
 	{
 	    switch(i)
 	    {
@@ -460,6 +461,10 @@ main(int argc, const char *argv[])
 
 	      case 'z':
 		ps.kidle = !ps.kidle;
+		break;
+
+		case 'g':	/* grep command name */
+			ps.command = strdup(optarg);
 		break;
 
 	      default:
@@ -1150,6 +1155,24 @@ restart:
 				} else
 					clear_message();
 				break;
+
+				case CMD_grep:
+					new_message(MT_standout,
+			    		"Grep command name: ");
+					if (readline(tempbuf2, sizeof(tempbuf2), No) > 0) {
+						free(ps.command);
+						if (tempbuf2[0] == '+' &&
+				    		tempbuf2[1] == '\0')
+								ps.command = NULL;
+						else
+								ps.command = strdup(tempbuf2);
+						if (putchar('\r') == EOF)
+							exit(1);
+					} else
+						clear_message();
+				break;
+
+
 			    case CMD_NONE:
 					assert(false && "reached switch without command");
 			}
