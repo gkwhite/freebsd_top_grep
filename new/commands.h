@@ -46,7 +46,7 @@ enum cmd_id {
 	CMD_order,
 	CMD_pid	,
 	CMD_toggletid,
-	CMD_grep
+	CMD_grep		// -- GKW
 };
 
 struct command {
