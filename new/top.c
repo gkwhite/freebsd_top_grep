@@ -99,7 +99,7 @@ static const struct option longopts[] = {
     { "batch", no_argument, NULL, 'b' },
     /* c reserved */
     { "displays", required_argument, NULL, 'd' },
-    { "grep", required_argument, NULL, 'g' },
+    { "grep", required_argument, NULL, 'g' },		// -- GKW
     { "interactive", no_argument, NULL, 'i' },
     { "jail-id", no_argument, NULL, 'j' },
     { "display-mode", required_argument, NULL, 'm' },
@@ -313,7 +313,7 @@ main(int argc, const char *argv[])
 	    optind = 1;
 	}
 
-	while ((i = getopt_long(ac, __DECONST(char * const *, av), "CSIHPabijJ:nquvzs:d:U:m:o:p:Ttwg:", longopts, NULL)) != EOF)
+	while ((i = getopt_long(ac, __DECONST(char * const *, av), "CSIHPabijJ:nquvzs:d:U:m:o:p:Ttwg:", longopts, NULL)) != EOF)		// -- GKW
 	{
 	    switch(i)
 	    {
@@ -463,9 +463,11 @@ main(int argc, const char *argv[])
 		ps.kidle = !ps.kidle;
 		break;
 
+		// -- GKW
 		case 'g':	/* grep command name */
 			ps.command = strdup(optarg);
 		break;
+		// -- GKW
 
 	      default:
 		errx(1, 
@@ -1156,6 +1158,7 @@ restart:
 					clear_message();
 				break;
 
+				// -- GKW
 				case CMD_grep:
 					new_message(MT_standout,
 			    		"Grep command name: ");
@@ -1171,6 +1174,7 @@ restart:
 					} else
 						clear_message();
 				break;
+				// -- GKW
 
 
 			    case CMD_NONE:
