@@ -742,7 +742,7 @@ cmd_matches(struct kinfo_proc *proc, char *term)
 		return 1;
 	} else {
 		/* Filter set, process name needs to contain term */
-		if (strstr(proc->p_comm, term))
+		if (strstr(proc->ki_comm, term))
 			return 1;
 		/* If showing arguments, search those as well */
 		if (show_args) {
